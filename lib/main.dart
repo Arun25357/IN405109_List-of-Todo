@@ -28,14 +28,23 @@ class TodoApp extends StatefulWidget {
   State<TodoApp> createState() => _TodoAppState();
 }
 
+class _TodaItem {
+  String title;
+  String description;
+
+  _TodaItem(this.title, this.description);
+}
+
 class _TodoAppState extends State<TodoApp> {
-  late TextEditingController _controller;
-  final List<String> _myList = [];
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  final List<_TodaItem> _myList = [];
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    _titleController = TextEditingController();
+    _descriptionController = TextEditingController();
   }
 
   void addTodoHandle(BuildContext context) {
@@ -44,21 +53,39 @@ class _TodoAppState extends State<TodoApp> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Add new task"),
-          content: TextField(
-            controller: _controller,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: "Input your task",
-            ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Title",
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Description",
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
               onPressed: () {
                 setState(() {
-                  // Add new task to the list
-                  if (_controller.text.isNotEmpty) {
-                    _myList.add(_controller.text);
-                    _controller.clear(); // Clear text field after saving
+                  if (_titleController.text.isNotEmpty &&
+                      _descriptionController.text.isNotEmpty) {
+                    // Add title and description to the list
+                    _myList.add(_TodaItem(
+                      _titleController.text,
+                      _descriptionController.text,
+                    ));
+                    _titleController.clear(); // Clear the title field
+                    _descriptionController.clear(); // Clear the description field
                   }
                 });
                 Navigator.of(context).pop(); // Close the dialog
@@ -84,7 +111,8 @@ class _TodoAppState extends State<TodoApp> {
               itemCount: _myList.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(_myList[index]),
+                  title: Text(_myList[index].title), // First row: Title
+                  subtitle: Text(_myList[index].description), // Second row: Description
                 );
               },
             ),
